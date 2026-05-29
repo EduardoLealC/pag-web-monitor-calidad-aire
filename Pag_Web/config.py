@@ -11,7 +11,7 @@ BUCKET     = os.getenv("INFLUX_BUCKET")
 DEVICE     = os.getenv("INFLUX_DEVICE")
 
 # ── Campos a consultar ────────────────────────────────────────────
-FIELDS = ["temperatura", "humedad", "co2", "co", "pm25", "pm10", "luz"]
+FIELDS = ["temperatura", "humedad", "co2", "co", "pm2_5", "pm10", "luz"]
 
 # ── Umbrales y metadata por parámetro ────────────────────────────
 PARAMS = {
@@ -111,7 +111,7 @@ PARAMS = {
 
         ],
     },
-    "pm25": {
+    "pm2_5": {
         "label": "PM2.5",
         "unit": "µg/m³",
         "ok_range": (0, 35),

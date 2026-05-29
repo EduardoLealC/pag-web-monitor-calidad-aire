@@ -1,28 +1,29 @@
-# Instalar si no tienes: pip install streamlit-autorefresh
 import streamlit as st
-from streamlit_autorefresh import st_autorefresh
 from data.influx import get_latest_values
-from component.kpi_card import render_kpi_cards
+from component.kpi_card import render_kpi_cards, _show_detail
 from config import PARAMS
+
+
+@st.fragment(run_every=300)
+def _data_fragment():
+    with st.spinner("Consultando sensores..."):
+        data = get_latest_values()
+    render_kpi_cards(data, PARAMS)
+
 
 def render():
     st.title("Monitor de Calidad de Aire")
-    st.caption("Laboratorio Mancera — actualización cada 30 s")
+    st.caption("Laboratorio Mancera — actualización cada 5 min")
 
-    st_autorefresh(interval=30_000)
+    # Modal fuera del fragment — sobrevive los reruns de 5 min
+    if st.session_state.get("__kpi_open"):
+        field    = st.session_state.pop("__kpi_open")
+        snapshot = st.session_state.pop("__kpi_snapshot", {})
+        _show_detail(field, PARAMS, snapshot)
 
-    # Leer selección desde query params
-    qp = st.query_params
-    if "kpi" in qp:
-        val = qp["kpi"]
-        st.session_state["selected_kpi"] = None if val == "none" else val
+    _data_fragment()
 
-    with st.spinner("Consultando sensores..."):
-        data = get_latest_values()
-
-    render_kpi_cards(data, PARAMS)
     st.divider()
-
     st.subheader("Visualización completa")
-    grafana_url = "http://localhost:3000/public-dashboards/37fd3b15f7fa444f9a7162119265a78c"
+    grafana_url = "http://146.83.216.213:3000/public-dashboards/debf9db62ab945d8a29128105b3a45bc"
     st.components.v1.iframe(grafana_url, height=800)
